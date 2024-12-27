@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:trackifly/main.dart';
 
 class ApiService {
   static String get clientId => dotenv.get('CLIENT_ID');
@@ -110,8 +112,22 @@ class ApiService {
     return null;
   }
 
-  static void logout() {
+  static void logout(BuildContext context) {
     accessToken = null;
     refreshToken = null;
+
+    // Zobrazení potvrzení o odhlášení
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Byl(a) jsi úspěšně odhlášen(a).')),
+    );
+
+    // Navigace zpět na uvítací obrazovku
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+    );
   }
+
+
+
 }

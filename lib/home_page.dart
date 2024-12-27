@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Funkce pro odhlášení
   Future<void> logout() async {
-    ApiService.logout();
+    ApiService.logout(context);
     setState(() {
       _isLoggedIn = false;
       userProfileImage = null;
