@@ -1,117 +1,127 @@
 import 'package:flutter/material.dart';
+import 'api_service.dart'; // Ujistěte se, že máte importován soubor s ApiService
+import 'home_page.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 void main() async {
-  await dotenv.load(fileName: "./.env");
+  await dotenv.load(fileName: "lib/.env");
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Spotify Stats',
+      title: 'Trackifly',
       theme: ThemeData(
-        primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: LoginPage(),
-    );
-  }
-}
-
-class LoginPage extends StatefulWidget {
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _storage = const FlutterSecureStorage();
-
-  Future<void> _authenticate() async {
-    final clientId = dotenv.env['SPOTIFY_CLIENT_ID'];
-    final redirectUri = dotenv.env['SPOTIFY_REDIRECT_URI'];
-    final scopes = 'user-top-read';
-
-    final authUrl =
-        'https://accounts.spotify.com/authorize?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&scope=$scopes';
-
-    try {
-      final result = await FlutterWebAuth.authenticate(
-        url: authUrl,
-        callbackUrlScheme: Uri.parse(redirectUri!).scheme,
-      );
-
-      final code = Uri.parse(result).queryParameters['code'];
-      if (code != null) {
-        await _getAccessToken(code);
-      }
-    } catch (e) {
-      print('Authentication error: $e');
-    }
-  }
-
-  Future<void> _getAccessToken(String code) async {
-    final clientId = dotenv.env['SPOTIFY_CLIENT_ID'];
-    final clientSecret = dotenv.env['SPOTIFY_CLIENT_SECRET'];
-    final redirectUri = dotenv.env['SPOTIFY_REDIRECT_URI'];
-
-    final response = await http.post(
-      Uri.parse('https://accounts.spotify.com/api/token'),
-      headers: {
-        'Authorization':
-            'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': redirectUri,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      await _storage.write(key: 'access_token', value: data['access_token']);
-      await _storage.write(key: 'refresh_token', value: data['refresh_token']);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => StatsPage()),
-      );
-    } else {
-      print('Failed to get access token: ${response.body}');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Spotify Login'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: _authenticate,
-          child: Text('Login with Spotify'),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.amber,
+          brightness: Brightness.dark,
         ),
+        useMaterial3: true,
       ),
+      home: WelcomeScreen(),
     );
   }
 }
 
-class StatsPage extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _isLoading = false;
+
+  // Funkce pro přihlášení přes Spotify
+  Future<void> _authenticate() async {
+    HapticFeedback.heavyImpact();
+    setState(() {
+      _isLoading = true;
+    });
+    await ApiService.authenticate();
+    setState(() {
+      _isLoading = false;
+    });
+    if (ApiService.accessToken != null) {
+      // Přesměrování nebo pokračování v aplikaci po úspěšném přihlášení
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyHomePage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Your Spotify Stats'),
-      ),
-      body: Center(
-        child: Text('Welcome to Spotify Stats!'),
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  // Ikona aplikace
+                  Icon(Icons.music_note, size: 100, color: Colors.amber),
+                  SizedBox(height: 20),
+                  // Název aplikace
+                  Text(
+                    'Trackifly',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  // Popis aplikace
+                  Text(
+                    'Objevujte své hudební preference a sledujte oblíbené skladby a umělce na Spotify.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 30),
+                  // Spinner pro načítání, pokud je potřeba
+                  if (_isLoading)
+                    CircularProgressIndicator(
+                      color: Colors.amber, // Material 3 spinner
+                    ),
+                ],
+              ),
+            ),
+          ),
+          // Tlačítko na spodní část obrazovky s odsazením
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30.0), // Odsazení od spodního okraje
+              child: _isLoading
+                  ? Container() // Pokud je loading, tlačítko se nezobrazí
+                  : ElevatedButton(
+                      onPressed: _authenticate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      ),
+                      child: Text(
+                        'Přihlásit se přes Spotify',
+                        style: TextStyle(
+                          color: Colors.black, // Nastavíme barvu textu na černou
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

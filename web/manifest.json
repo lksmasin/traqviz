@@ -1,6 +1,6 @@
 {
-    "name": "spotstats",
-    "short_name": "spotstats",
+    "name": "trackifly",
+    "short_name": "trackifly",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
