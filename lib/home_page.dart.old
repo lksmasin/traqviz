@@ -15,8 +15,11 @@ class _MyHomePageState extends State<MyHomePage> {
   String? userProfileImage;
   List<Map<String, dynamic>> _topTracks = [];
   List<Map<String, dynamic>> _topArtists = [];
-  String? _lastPlayedTrack;
+  List<Map<String, dynamic>> _recentPlays = [];
   int _selectedIndex = 0;
+  bool _showAllTracks = false;
+  bool _showAllArtists = false;
+  bool _showAllGenres = false;
 
   @override
   void initState() {
@@ -24,27 +27,24 @@ class _MyHomePageState extends State<MyHomePage> {
     _checkLoginStatus();
   }
 
-  // Zkontrolujeme, jestli je uživatel přihlášen, pokud ne, přesměrujeme na uvítací obrazovku
   Future<void> _checkLoginStatus() async {
     setState(() {
       _isLoggedIn = ApiService.accessToken != null;
     });
 
     if (_isLoggedIn) {
-      await _loadUserData();  // Načteme data po přihlášení
+      await _loadUserData();
     }
   }
 
-  // Funkce pro načtení uživatelských dat
   Future<void> _loadUserData() async {
     userProfileImage = await ApiService.fetchUserProfile();
     _topTracks = await ApiService.fetchTopTracks();
     _topArtists = await ApiService.fetchTopArtists();
-    _lastPlayedTrack = await ApiService.fetchLastPlayedTrack();
+    _recentPlays = await ApiService.fetchRecentPlays(limit: 4);
     setState(() {});
   }
 
-  // Funkce pro přihlášení
   Future<void> authenticate() async {
     await ApiService.authenticate().then((_) async {
       setState(() {
@@ -52,24 +52,23 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       if (_isLoggedIn) {
-        await _loadUserData();  // Načteme data po přihlášení
+        await _loadUserData();
       }
     });
   }
 
-  // Funkce pro odhlášení
   Future<void> logout() async {
+    HapticFeedback.selectionClick();
     ApiService.logout(context);
     setState(() {
       _isLoggedIn = false;
       userProfileImage = null;
       _topTracks.clear();
       _topArtists.clear();
-      _lastPlayedTrack = null;
+      _recentPlays.clear();
     });
   }
 
-  // Funkce pro přepínání mezi taby
   void _onItemTapped(int index) {
     HapticFeedback.selectionClick();
     setState(() {
@@ -91,16 +90,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: CircleAvatar(
                   backgroundImage: userProfileImage != null && userProfileImage!.isNotEmpty
                       ? NetworkImage(userProfileImage!)
-                      : null, // Použijeme NetworkImage pokud je obrázek k dispozici
+                      : null,
                   child: userProfileImage == null || userProfileImage!.isEmpty
-                      ? Icon(Icons.person, size: 40) // Pokud není obrázek, zobrazí ikonu
+                      ? Icon(Icons.person, size: 40)
                       : null,
                 ),
               ),
             ),
         ],
       ),
-      body: _isLoggedIn ? _buildSelectedTab() : WelcomeScreen(), // Pokud není přihlášen, zobrazí se uvítací obrazovka
+      body: _isLoggedIn ? _buildSelectedTab() : WelcomeScreen(),
       bottomNavigationBar: _isLoggedIn
           ? NavigationBar(
               selectedIndex: _selectedIndex,
@@ -110,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 NavigationDestination(icon: Icon(Icons.equalizer), label: 'Statistiky'),
               ],
             )
-          : null, // Navigační lišta se zobrazuje pouze po přihlášení
+          : null,
     );
   }
 
@@ -125,46 +124,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // Opravený kód pro buildStatsTab
-  Widget _buildStatsTab() {
-    int genreCounter = 1;
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        _buildStatsBlock(
-          title: 'Nejhranější písničky',
-          content: _topTracks.map((track) => ListTile(
-                leading: Image.network(track['image']),
-                title: Text(track['name']),
-                subtitle: Text(track['artist']),
-              )).toList(), // Přidání toList pro správné vykreslení
-        ),
-        _buildStatsBlock(
-          title: 'Nejhranější umělci',
-          content: _topArtists.map((artist) => ListTile(
-                leading: Image.network(artist['image']),
-                title: Text(artist['name']),
-                subtitle: Text(artist['genres'].join(', ')),
-              )).toList(), // Přidání toList pro správné vykreslení
-        ),
-        _buildStatsBlock(
-          title: 'Nejhranější žánry',
-          content: _topArtists
-              .expand((artist) => artist['genres'])
-              .toSet()
-              .map((genre) => ListTile(
-                    leading: CircleAvatar(
-                      child: Text('${genreCounter++}'),
-                    ),
-                    title: Text(genre),
-                  )).toList(), // Přidání toList pro správné vykreslení
-        ),
-      ],
-    );
-  }
-
-  // Opravené použití Image.network s výchozím obrázkem při null hodnotě
-  // Opravené použití Icon místo Image.network s výchozí hodnotou
   Widget _buildHomeTab() {
     final topTrack = _topTracks.isNotEmpty ? _topTracks.first : null;
     final topArtist = _topArtists.isNotEmpty ? _topArtists.first : null;
@@ -172,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ? topArtist['genres'].first
         : 'N/A';
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   leading: topTrack['image'] != null
                       ? Image.network(topTrack['image'])
-                      : Icon(Icons.music_note, size: 40), // Ikona místo obrázku
+                      : Icon(Icons.music_note, size: 40),
                   title: Text(topTrack['name']),
                   subtitle: Text(topTrack['artist']),
                 ),
@@ -197,27 +156,69 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   leading: topArtist['image'] != null
                       ? Image.network(topArtist['image'])
-                      : Icon(Icons.person, size: 40), // Ikona místo obrázku
+                      : Icon(Icons.person, size: 40),
                   title: Text(topArtist['name']),
                   subtitle: Text('Žánr: $topGenre'),
                 ),
             ],
           ),
           _buildStatsBlock(
-            title: 'Naposledy hraná písnička',
-            content: [
-              if (_lastPlayedTrack != null)
-                ListTile(
-                  title: Text(_lastPlayedTrack!),
-                ),
-            ],
+            title: 'Naposledy hrané skladby',
+            content: _recentPlays.map((play) => ListTile(
+                  leading: Image.network(play['image']),
+                  title: Text(play['name']),
+                  subtitle: Text(play['artist']),
+                )).toList(),
           ),
         ],
       ),
     );
   }
 
-
+  Widget _buildStatsTab() {
+    int genreCounter = 1;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildExpandableStatsBlock(
+            title: 'Nejhranější písničky',
+            items: _topTracks,
+            showAll: _showAllTracks,
+            onToggle: () => setState(() => _showAllTracks = !_showAllTracks),
+            itemBuilder: (track) => ListTile(
+              leading: Image.network(track['image']),
+              title: Text(track['name']),
+              subtitle: Text(track['artist']),
+            ),
+          ),
+          _buildExpandableStatsBlock(
+            title: 'Nejhranější umělci',
+            items: _topArtists,
+            showAll: _showAllArtists,
+            onToggle: () => setState(() => _showAllArtists = !_showAllArtists),
+            itemBuilder: (artist) => ListTile(
+              leading: Image.network(artist['image']),
+              title: Text(artist['name']),
+              subtitle: Text(artist['genres'].join(', ')),
+            ),
+          ),
+          _buildExpandableStatsBlock(
+            title: 'Nejhranější žánry',
+            items: _topArtists.expand((artist) => artist['genres']).toList(),
+            showAll: _showAllGenres,
+            onToggle: () => setState(() => _showAllGenres = !_showAllGenres),
+            itemBuilder: (genre) => ListTile(
+              leading: CircleAvatar(
+                      child: Text('${genreCounter++}'),
+                    ),
+              title: Text(genre),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildStatsBlock({required String title, required Iterable<Widget> content}) {
     return Padding(
@@ -238,6 +239,49 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               SizedBox(height: 16.0),
               ...content,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandableStatsBlock<T>({
+    required String title,
+    required List<T> items,
+    required bool showAll,
+    required VoidCallback onToggle,
+    required Widget Function(T item) itemBuilder,
+  }) {
+    final displayedItems = showAll ? items : items.take(4).toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  IconButton(
+                    icon: Icon(showAll ? Icons.expand_less : Icons.expand_more),
+                    onPressed: onToggle,
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.0),
+              ...displayedItems.map(itemBuilder),
             ],
           ),
         ),

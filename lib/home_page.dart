@@ -20,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _showAllTracks = false;
   bool _showAllArtists = false;
   bool _showAllGenres = false;
+  bool _showAllRecentPlays = false;
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
     userProfileImage = await ApiService.fetchUserProfile();
     _topTracks = await ApiService.fetchTopTracks();
     _topArtists = await ApiService.fetchTopArtists();
-    _recentPlays = await ApiService.fetchRecentPlays(limit: 4);
+    _recentPlays = await ApiService.fetchRecentPlays();
     setState(() {});
   }
 
@@ -130,12 +131,26 @@ class _MyHomePageState extends State<MyHomePage> {
     final topGenre = topArtist != null && topArtist['genres'].isNotEmpty
         ? topArtist['genres'].first
         : 'N/A';
+    final recentPlay = _recentPlays.isNotEmpty ? _recentPlays.first : null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildStatsBlock(
+            title: 'Naposledy přehraná skladba',
+            content: [
+              if (recentPlay != null)
+                ListTile(
+                  leading: recentPlay['image'] != null
+                      ? Image.network(recentPlay['image'])
+                      : Icon(Icons.music_note, size: 40),
+                  title: Text(recentPlay['name']),
+                  subtitle: Text(recentPlay['artist']),
+                ),
+            ],
+          ),
           _buildStatsBlock(
             title: 'Nejhranější písnička',
             content: [
@@ -161,14 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   subtitle: Text('Žánr: $topGenre'),
                 ),
             ],
-          ),
-          _buildStatsBlock(
-            title: 'Naposledy hrané skladby',
-            content: _recentPlays.map((play) => ListTile(
-                  leading: Image.network(play['image']),
-                  title: Text(play['name']),
-                  subtitle: Text(play['artist']),
-                )).toList(),
           ),
         ],
       ),
@@ -210,9 +217,20 @@ class _MyHomePageState extends State<MyHomePage> {
             onToggle: () => setState(() => _showAllGenres = !_showAllGenres),
             itemBuilder: (genre) => ListTile(
               leading: CircleAvatar(
-                      child: Text('${genreCounter++}'),
-                    ),
+                child: Text('${genreCounter++}'),
+              ),
               title: Text(genre),
+            ),
+          ),
+          _buildExpandableStatsBlock(
+            title: 'Historie posledních skladeb',
+            items: _recentPlays,
+            showAll: _showAllRecentPlays,
+            onToggle: () => setState(() => _showAllRecentPlays = !_showAllRecentPlays),
+            itemBuilder: (play) => ListTile(
+              leading: play['image'] != null ? Image.network(play['image']) : Icon(Icons.music_note),
+              title: Text(play['name']),
+              subtitle: Text(play['artist']),
             ),
           ),
         ],

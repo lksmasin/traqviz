@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trackifly/main.dart';
+import 'package:flutter/foundation.dart' as Foundation;  // Pro detekci platformy
 
 class ApiService {
   static String get clientId => dotenv.get('CLIENT_ID');
@@ -17,18 +18,27 @@ class ApiService {
   static String? accessToken;
   static String? refreshToken;
 
-  static Future<void> authenticate() async {
-    final result = await FlutterWebAuth.authenticate(
-      url:
-          'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$REDIRECT_URI&scope=user-top-read user-read-private user-read-email user-read-recently-played',
-      callbackUrlScheme: 'trackifly',
-    );
+ static Future<void> authenticate() async {
+  String redirectUri;
 
-    final code = Uri.parse(result).queryParameters['code'];
-    if (code != null) {
-      await _getAccessToken(code);
-    }
+  // Pokud jsme na webu, použijeme URL pro webovou autentizaci
+  if (Foundation.kIsWeb) {
+    redirectUri = 'http://0.0.0.0:8000/auth.html';  // URL na auth.html pro web
+  } else {
+    redirectUri = 'trackifly://callback';  // URI pro nativní platformy (Android/iOS)
   }
+
+  final result = await FlutterWebAuth2.authenticate(
+    url:
+        'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played',
+    callbackUrlScheme: Foundation.kIsWeb ? 'http://0.0.0.0:8000/auth.html' : 'trackifly',  // Webová callback URL nebo nativní URI schéma
+  );
+
+  final code = Uri.parse(result).queryParameters['code'];
+  if (code != null) {
+    await _getAccessToken(code);
+  }
+}
 
   static Future<void> _getAccessToken(String code) async {
     final response = await http.post(
@@ -97,7 +107,7 @@ class ApiService {
     return [];
   }
 
-  static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 4, int days = 0}) async {
+  static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 30, int days = 0}) async {
     final uri = Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED)
         .replace(queryParameters: {'limit': limit.toString()});
 
