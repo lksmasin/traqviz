@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:trackifly/api_service.dart';
 import 'main.dart';
@@ -21,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _showAllArtists = false;
   bool _showAllGenres = false;
   bool _showAllRecentPlays = false;
+  Map<String, dynamic>? _currentlyPlaying;
 
   @override
   void initState() {
@@ -43,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _topTracks = await ApiService.fetchTopTracks();
     _topArtists = await ApiService.fetchTopArtists();
     _recentPlays = await ApiService.fetchRecentPlays();
+    _currentlyPlaying = await ApiService.fetchCurrentlyPlaying();
     setState(() {});
   }
 
@@ -126,12 +130,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildHomeTab() {
-    final topTrack = _topTracks.isNotEmpty ? _topTracks.first : null;
+    final currentTrack = _topTracks.isNotEmpty ? _topTracks.first : null;
     final topArtist = _topArtists.isNotEmpty ? _topArtists.first : null;
     final topGenre = topArtist != null && topArtist['genres'].isNotEmpty
         ? topArtist['genres'].first
         : 'N/A';
     final recentPlay = _recentPlays.isNotEmpty ? _recentPlays.first : null;
+
+    // Pokud není aktuálně přehrávána skladba, zobrazíme naposledy přehrávanou
+    final currentlyPlaying = _currentlyPlaying ?? recentPlay;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -139,28 +146,28 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildStatsBlock(
-            title: 'Naposledy přehraná skladba',
+            title: 'Aktuálně přehrávaná skladba',
             content: [
-              if (recentPlay != null)
+              if (currentlyPlaying != null)
                 ListTile(
-                  leading: recentPlay['image'] != null
-                      ? Image.network(recentPlay['image'])
+                  leading: currentlyPlaying['image'] != null
+                      ? Image.network(currentlyPlaying['image'])
                       : Icon(Icons.music_note, size: 40),
-                  title: Text(recentPlay['name']),
-                  subtitle: Text(recentPlay['artist']),
+                  title: Text(currentlyPlaying['name']),
+                  subtitle: Text(currentlyPlaying['artist']),
                 ),
             ],
           ),
           _buildStatsBlock(
             title: 'Nejhranější písnička',
             content: [
-              if (topTrack != null)
+              if (currentTrack != null)
                 ListTile(
-                  leading: topTrack['image'] != null
-                      ? Image.network(topTrack['image'])
+                  leading: currentTrack['image'] != null
+                      ? Image.network(currentTrack['image'])
                       : Icon(Icons.music_note, size: 40),
-                  title: Text(topTrack['name']),
-                  subtitle: Text(topTrack['artist']),
+                  title: Text(currentTrack['name']),
+                  subtitle: Text(currentTrack['artist']),
                 ),
             ],
           ),
@@ -181,6 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
 
   Widget _buildStatsTab() {
     int genreCounter = 1;
@@ -212,15 +220,19 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           _buildExpandableStatsBlock(
             title: 'Nejhranější žánry',
-            items: _topArtists.expand((artist) => artist['genres']).toList(),
+            items: LinkedHashSet<String>.from(
+              _topArtists.expand((artist) => artist['genres'])
+            ).toList(),  // LinkedHashSet zachová pořadí
             showAll: _showAllGenres,
             onToggle: () => setState(() => _showAllGenres = !_showAllGenres),
-            itemBuilder: (genre) => ListTile(
-              leading: CircleAvatar(
-                child: Text('${genreCounter++}'),
-              ),
-              title: Text(genre),
-            ),
+            itemBuilder: (genre) {
+              return ListTile(
+                leading: CircleAvatar(
+                  child: Text('${genreCounter++}'),
+                ),
+                title: Text(genre),
+              );
+            },
           ),
           _buildExpandableStatsBlock(
             title: 'Historie posledních skladeb',

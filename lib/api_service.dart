@@ -14,31 +14,32 @@ class ApiService {
   static const String SPOTIFY_API_URL_TRACKS = 'https://api.spotify.com/v1/me/top/tracks';
   static const String SPOTIFY_API_URL_ARTISTS = 'https://api.spotify.com/v1/me/top/artists';
   static const String SPOTIFY_API_URL_RECENTLY_PLAYED = 'https://api.spotify.com/v1/me/player/recently-played';
+  static const String SPOTIFY_API_URL_CURRENTLY_PLAYING = 'https://api.spotify.com/v1/me/player/currently-playing'; // Nový endpoint pro aktuální skladbu
 
   static String? accessToken;
   static String? refreshToken;
 
- static Future<void> authenticate() async {
-  String redirectUri;
+  static Future<void> authenticate() async {
+    String redirectUri;
 
-  // Pokud jsme na webu, použijeme URL pro webovou autentizaci
-  if (Foundation.kIsWeb) {
-    redirectUri = 'http://0.0.0.0:8000/auth.html';  // URL na auth.html pro web
-  } else {
-    redirectUri = 'trackifly://callback';  // URI pro nativní platformy (Android/iOS)
+    // Pokud jsme na webu, použijeme URL pro webovou autentizaci
+    if (Foundation.kIsWeb) {
+      redirectUri = 'http://0.0.0.0:8000/auth.html';  // URL na auth.html pro web
+    } else {
+      redirectUri = 'trackifly://callback';  // URI pro nativní platformy (Android/iOS)
+    }
+
+    final result = await FlutterWebAuth2.authenticate(
+      url:
+          'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state',
+      callbackUrlScheme: Foundation.kIsWeb ? 'http://0.0.0.0:8000/auth.html' : 'trackifly',  // Webová callback URL nebo nativní URI schéma
+    );
+
+    final code = Uri.parse(result).queryParameters['code'];
+    if (code != null) {
+      await _getAccessToken(code);
+    }
   }
-
-  final result = await FlutterWebAuth2.authenticate(
-    url:
-        'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played',
-    callbackUrlScheme: Foundation.kIsWeb ? 'http://0.0.0.0:8000/auth.html' : 'trackifly',  // Webová callback URL nebo nativní URI schéma
-  );
-
-  final code = Uri.parse(result).queryParameters['code'];
-  if (code != null) {
-    await _getAccessToken(code);
-  }
-}
 
   static Future<void> _getAccessToken(String code) async {
     final response = await http.post(
@@ -130,6 +131,58 @@ class ApiService {
     }
     return [];
   }
+
+  static Future<Map<String, dynamic>?> fetchCurrentlyPlaying() async {
+    final response = await http.get(
+      Uri.parse(SPOTIFY_API_URL_CURRENTLY_PLAYING),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      // Ověření, že data obsahují položku 'item', která je skladba
+      if (data == null || data['item'] == null) {
+        // Pokud není žádná skladba přehrávána, získáme naposledy přehrávanou skladbu
+        return await fetchLastPlayedTrack();
+      }
+
+      return {
+        'name': data['item']['name'],
+        'artist': data['item']['artists'][0]['name'],
+        'image': data['item']['album']['images'][0]['url'],
+      };
+    } else {
+      print('Error: ${response.statusCode} - ${response.body}');  // Logování chyby
+    }
+
+    return null;  // Pokud API nevrátí platná data
+  }
+
+  static Future<Map<String, dynamic>?> fetchLastPlayedTrack() async {
+    final response = await http.get(
+      Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data != null && data['items'] != null && data['items'].isNotEmpty) {
+        final track = data['items'][0]['track'];
+        return {
+          'name': track['name'],
+          'artist': track['artists'][0]['name'],
+          'image': track['album']['images'][0]['url'],
+        };
+      }
+    } else {
+      print('Error: ${response.statusCode} - ${response.body}');  // Logování chyby
+    }
+
+    return null;  // Pokud není žádná poslední skladba
+  }
+
+
 
   static void logout(BuildContext context) {
     accessToken = null;
