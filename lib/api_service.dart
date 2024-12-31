@@ -74,9 +74,11 @@ class ApiService {
     return null;
   }
 
-  static Future<List<Map<String, dynamic>>> fetchTopTracks() async {
+  static Future<List<Map<String, dynamic>>> fetchTopTracks({String timeRange = 'short_term'}) async {
+    final uri = Uri.parse(SPOTIFY_API_URL_TRACKS).replace(queryParameters: {'time_range': timeRange});
+
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_TRACKS),
+      uri,
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -91,9 +93,11 @@ class ApiService {
     return [];
   }
 
-  static Future<List<Map<String, dynamic>>> fetchTopArtists() async {
+  static Future<List<Map<String, dynamic>>> fetchTopArtists({String timeRange = 'short_term'}) async {
+    final uri = Uri.parse(SPOTIFY_API_URL_ARTISTS).replace(queryParameters: {'time_range': timeRange});
+
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_ARTISTS),
+      uri,
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -107,6 +111,7 @@ class ApiService {
     }
     return [];
   }
+
 
   static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 30, int days = 0}) async {
     final uri = Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED)

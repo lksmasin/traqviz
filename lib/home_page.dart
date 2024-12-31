@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:trackifly/api_service.dart';
 import 'main.dart';
@@ -146,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildStatsBlock(
-            title: 'Aktuálně přehrávaná skladba',
+            title: 'Aktuální / poslední přehrávaná skladba',
             content: [
               if (currentlyPlaying != null)
                 ListTile(
@@ -184,6 +182,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
             ],
           ),
+          // Přidáme sekci pro historii přehrávaných skladeb
+          _buildExpandableStatsBlock(
+            title: 'Historie přehrávaných skladeb',
+            items: _recentPlays,
+            showAll: _showAllRecentPlays,
+            onToggle: () => setState(() => _showAllRecentPlays = !_showAllRecentPlays),
+            itemBuilder: (track) => ListTile(
+              leading: track['image'] != null
+                  ? Image.network(track['image'])
+                  : Icon(Icons.music_note, size: 40),
+              title: Text(track['name']),
+              subtitle: Text(track['artist']),
+            ),
+          ),
         ],
       ),
     );
@@ -191,62 +203,94 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   Widget _buildStatsTab() {
-    int genreCounter = 1;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+    return DefaultTabController(
+      length: 3,
       child: Column(
         children: [
-          _buildExpandableStatsBlock(
-            title: 'Nejhranější písničky',
-            items: _topTracks,
-            showAll: _showAllTracks,
-            onToggle: () => setState(() => _showAllTracks = !_showAllTracks),
-            itemBuilder: (track) => ListTile(
-              leading: Image.network(track['image']),
-              title: Text(track['name']),
-              subtitle: Text(track['artist']),
-            ),
+          TabBar(
+            tabs: const [
+              Tab(text: 'Za 4 týdny'),
+              Tab(text: '6 měsíců'),
+              Tab(text: '12 měsíců'),
+            ],
           ),
-          _buildExpandableStatsBlock(
-            title: 'Nejhranější umělci',
-            items: _topArtists,
-            showAll: _showAllArtists,
-            onToggle: () => setState(() => _showAllArtists = !_showAllArtists),
-            itemBuilder: (artist) => ListTile(
-              leading: Image.network(artist['image']),
-              title: Text(artist['name']),
-              subtitle: Text(artist['genres'].join(', ')),
-            ),
-          ),
-          _buildExpandableStatsBlock(
-            title: 'Nejhranější žánry',
-            items: LinkedHashSet<String>.from(
-              _topArtists.expand((artist) => artist['genres'])
-            ).toList(),  // LinkedHashSet zachová pořadí
-            showAll: _showAllGenres,
-            onToggle: () => setState(() => _showAllGenres = !_showAllGenres),
-            itemBuilder: (genre) {
-              return ListTile(
-                leading: CircleAvatar(
-                  child: Text('${genreCounter++}'),
-                ),
-                title: Text(genre),
-              );
-            },
-          ),
-          _buildExpandableStatsBlock(
-            title: 'Historie posledních skladeb',
-            items: _recentPlays,
-            showAll: _showAllRecentPlays,
-            onToggle: () => setState(() => _showAllRecentPlays = !_showAllRecentPlays),
-            itemBuilder: (play) => ListTile(
-              leading: play['image'] != null ? Image.network(play['image']) : Icon(Icons.music_note),
-              title: Text(play['name']),
-              subtitle: Text(play['artist']),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildStatsContent(timeRange: 'short_term'),
+                _buildStatsContent(timeRange: 'medium_term'),
+                _buildStatsContent(timeRange: 'long_term'),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStatsContent({required String timeRange}) {
+    return FutureBuilder(
+      future: Future.wait([
+        ApiService.fetchTopTracks(timeRange: timeRange),
+        ApiService.fetchTopArtists(timeRange: timeRange),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Chyba načítání dat.'));
+        }
+
+        final data = snapshot.data as List<dynamic>;
+        final topTracks = data[0] as List<Map<String, dynamic>>;
+        final topArtists = data[1] as List<Map<String, dynamic>>;
+
+        // Generating top genres from artists
+        final topGenres = topArtists.expand((artist) => artist['genres']).toSet().toList();
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              _buildExpandableStatsBlock(
+                title: 'Nejhranější písničky',
+                items: topTracks,
+                showAll: _showAllTracks,
+                onToggle: () => setState(() => _showAllTracks = !_showAllTracks),
+                itemBuilder: (track) => ListTile(
+                  leading: Image.network(track['image']),
+                  title: Text(track['name']),
+                  subtitle: Text(track['artist']),
+                ),
+              ),
+              _buildExpandableStatsBlock(
+                title: 'Nejhranější umělci',
+                items: topArtists,
+                showAll: _showAllArtists,
+                onToggle: () => setState(() => _showAllArtists = !_showAllArtists),
+                itemBuilder: (artist) => ListTile(
+                  leading: Image.network(artist['image']),
+                  title: Text(artist['name']),
+                  subtitle: Text(artist['genres'].join(', ')),
+                ),
+              ),
+              _buildExpandableStatsBlock(
+                title: 'Nejhranější žánry',
+                items: topGenres,
+                showAll: _showAllGenres,
+                onToggle: () => setState(() => _showAllGenres = !_showAllGenres),
+                itemBuilder: (genre) => ListTile(
+                  leading: CircleAvatar(
+                    child: Text('${topGenres.indexOf(genre) + 1}'),
+                  ),
+                  title: Text(genre),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
