@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trackifly/api_service.dart';
+import 'package:trackifly/setting_info_page.dart';
 import 'main.dart';
 import 'package:flutter/services.dart';
 
@@ -40,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadUserData() async {
-    userProfileImage = await ApiService.fetchUserProfile();
+    userProfileImage = (await ApiService.fetchUserProfile()) as String?;
     _topTracks = await ApiService.fetchTopTracks();
     _topArtists = await ApiService.fetchTopArtists();
     _recentPlays = await ApiService.fetchRecentPlays();
@@ -364,22 +365,51 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _showProfileMenu() async {
+    final userName = await ApiService.fetchUserName(); // Získání jména uživatele
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Profile Menu'),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Ahoj, $userName!'), // Zobrazení jména uživatele
+              SizedBox(height: 10),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () async {
                 await logout();
                 Navigator.pop(context);
               },
-              child: Text('Logout'),
+              child: Text('Odhlásit'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsPage()), // Navigace na stránku nastavení
+                );
+              },
+              child: Text('Nastavení'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => InfoPage()), // Navigace na stránku informací
+                );
+              },
+              child: Text('Informace'),
             ),
           ],
         );
       },
     );
   }
+
 }

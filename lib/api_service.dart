@@ -74,6 +74,19 @@ class ApiService {
     return null;
   }
 
+  static Future<String?> fetchUserName() async {
+    final response = await http.get(
+      Uri.parse(SPOTIFY_API_URL_ME),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['display_name']; // Vracení jména uživatele
+    }
+    return null;
+  }
+
   static Future<List<Map<String, dynamic>>> fetchTopTracks({String timeRange = 'short_term'}) async {
     final uri = Uri.parse(SPOTIFY_API_URL_TRACKS).replace(queryParameters: {'time_range': timeRange});
 
@@ -186,7 +199,6 @@ class ApiService {
 
     return null;  // Pokud není žádná poslední skladba
   }
-
 
 
   static void logout(BuildContext context) {
