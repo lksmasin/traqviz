@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadUserData() async {
-    userProfileImage = (await ApiService.fetchUserProfile()) as String?;
+    userProfileImage = (await ApiService.fetchUserProfile());
     _topTracks = await ApiService.fetchTopTracks();
     _topArtists = await ApiService.fetchTopArtists();
     _recentPlays = await ApiService.fetchRecentPlays();

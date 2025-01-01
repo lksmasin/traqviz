@@ -1,3 +1,4 @@
+![Project logo](./android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 
 # Trackifly
 
@@ -47,10 +48,9 @@ See `CONTRIBUTING.md` for ways to get started.
 ## Authors
 
 - [@lksmasin](https://www.github.com/lksmasin)
-- Your name can be here ;)
+- Adeloos (Project logo)
 
 
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-

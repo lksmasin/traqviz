@@ -142,10 +142,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           child: child,
                         );
                       },
-                      child: Icon(
-                        Icons.music_note,
-                        size: 120,
-                        color: Colors.white70,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/icon/icon.png', // Cesta k logu
+                          height: 120,
+                          width: 120,
+                          fit: BoxFit.cover, // Přizpůsobení obrázku do kruhu
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -204,4 +207,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       ),
     );
   }
+
+
 }
