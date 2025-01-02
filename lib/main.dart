@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ujistěte se, že se widgety správně inicializují
   await dotenv.load(fileName: "lib/.env");
   runApp(MyApp());
 }
@@ -46,10 +47,10 @@ class MyApp extends StatelessWidget {
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: Colors.white10, // Barva pozadí
           indicatorColor: Colors.white12, // Barva indikátoru pro vybranou položku
-          labelTextStyle: MaterialStateProperty.all(
+          labelTextStyle: WidgetStateProperty.all(
             TextStyle(color: Colors.white, fontSize: 12),
           ),
-          iconTheme: MaterialStateProperty.all(
+          iconTheme: WidgetStateProperty.all(
             IconThemeData(color: Colors.white),
           ),
         ),
@@ -124,15 +125,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     setState(() {
       _isLoading = true;
     });
-    await ApiService.authenticate();
+
+    try {
+      print('Začíná autentizace...');
+      await ApiService.authenticate();
+      print('Autentizace proběhla úspěšně');
+    } catch (e) {
+      print('Chyba při autentizaci: $e');
+    }
+
     setState(() {
       _isLoading = false;
     });
+
     if (ApiService.accessToken != null) {
+      print("Token: ${ApiService.accessToken}");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MyHomePage()),
       );
+    } else {
+      print('Token je null');
     }
   }
 
@@ -193,7 +206,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   builder: (context, child) {
                     return ElevatedButton(
                       onPressed: () async {
-                        await _authenticate();
+                        await _authenticate(); // Spustí autentizaci
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

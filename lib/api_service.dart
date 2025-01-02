@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trackifly/main.dart';
-import 'package:flutter/foundation.dart' as Foundation;  // Pro detekci platformy
+import 'package:flutter/foundation.dart' as Foundation;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static String get clientId => dotenv.get('CLIENT_ID');
@@ -14,25 +15,27 @@ class ApiService {
   static const String SPOTIFY_API_URL_TRACKS = 'https://api.spotify.com/v1/me/top/tracks';
   static const String SPOTIFY_API_URL_ARTISTS = 'https://api.spotify.com/v1/me/top/artists';
   static const String SPOTIFY_API_URL_RECENTLY_PLAYED = 'https://api.spotify.com/v1/me/player/recently-played';
-  static const String SPOTIFY_API_URL_CURRENTLY_PLAYING = 'https://api.spotify.com/v1/me/player/currently-playing'; // Nový endpoint pro aktuální skladbu
+  static const String SPOTIFY_API_URL_CURRENTLY_PLAYING = 'https://api.spotify.com/v1/me/player/currently-playing';
 
   static String? accessToken;
   static String? refreshToken;
 
   static Future<void> authenticate() async {
     String redirectUri;
+    String callbackUrlScheme;
 
-    // Pokud jsme na webu, použijeme URL pro webovou autentizaci
     if (Foundation.kIsWeb) {
-      redirectUri = 'http://0.0.0.0:8000/auth.html';  // URL na auth.html pro web
+      redirectUri = 'https://a859-83-136-207-34.ngrok-free.app/auth.html';
+      callbackUrlScheme = 'http';
     } else {
-      redirectUri = 'trackifly://callback';  // URI pro nativní platformy (Android/iOS)
+      redirectUri = 'trackifly://callback';
+      callbackUrlScheme = 'trackifly';
     }
 
     final result = await FlutterWebAuth2.authenticate(
       url:
           'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state',
-      callbackUrlScheme: Foundation.kIsWeb ? 'http://0.0.0.0:8000/auth.html' : 'trackifly',  // Webová callback URL nebo nativní URI schéma
+      callbackUrlScheme: callbackUrlScheme,
     );
 
     final code = Uri.parse(result).queryParameters['code'];
@@ -42,15 +45,24 @@ class ApiService {
   }
 
   static Future<void> _getAccessToken(String code) async {
+    // Získání správného redirectUri podle platformy
+    String redirectUri;
+    if (Foundation.kIsWeb) {
+      redirectUri = 'https://a859-83-136-207-34.ngrok-free.app/auth.html';
+    } else {
+      redirectUri = 'trackifly://callback';
+    }
+
     final response = await http.post(
       Uri.parse('https://accounts.spotify.com/api/token'),
       headers: {
         'Authorization': 'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': REDIRECT_URI,
+        'redirect_uri': redirectUri, // Dynamický redirectUri
       },
     );
 
@@ -58,8 +70,11 @@ class ApiService {
       final data = json.decode(response.body);
       accessToken = data['access_token'];
       refreshToken = data['refresh_token'];
+    } else {
+      print('Error: ${response.statusCode} - ${response.body}');
     }
   }
+
 
   static Future<String?> fetchUserProfile() async {
     final response = await http.get(
@@ -82,7 +97,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['display_name']; // Vracení jména uživatele
+      return data['display_name'];
     }
     return null;
   }
@@ -125,8 +140,7 @@ class ApiService {
     return [];
   }
 
-
-  static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 30, int days = 0}) async {
+  static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 30}) async {
     final uri = Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED)
         .replace(queryParameters: {'limit': limit.toString()});
 
@@ -159,9 +173,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
-      // Ověření, že data obsahují položku 'item', která je skladba
       if (data == null || data['item'] == null) {
-        // Pokud není žádná skladba přehrávána, získáme naposledy přehrávanou skladbu
         return await fetchLastPlayedTrack();
       }
 
@@ -171,10 +183,10 @@ class ApiService {
         'image': data['item']['album']['images'][0]['url'],
       };
     } else {
-      print('Error: ${response.statusCode} - ${response.body}');  // Logování chyby
+      print('Error: ${response.statusCode} - ${response.body}');
     }
 
-    return null;  // Pokud API nevrátí platná data
+    return null;
   }
 
   static Future<Map<String, dynamic>?> fetchLastPlayedTrack() async {
@@ -194,23 +206,20 @@ class ApiService {
         };
       }
     } else {
-      print('Error: ${response.statusCode} - ${response.body}');  // Logování chyby
+      print('Error: ${response.statusCode} - ${response.body}');
     }
 
-    return null;  // Pokud není žádná poslední skladba
+    return null;
   }
-
 
   static void logout(BuildContext context) {
     accessToken = null;
     refreshToken = null;
 
-    // Zobrazení potvrzení o odhlášení
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Byl(a) jsi úspěšně odhlášen(a).')),
     );
 
-    // Navigace zpět na uvítací obrazovku
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => WelcomeScreen()),
