@@ -210,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           TabBar(
             tabs: const [
-              Tab(text: 'Za 4 týdny'),
+              Tab(text: '4 týdny'),
               Tab(text: '6 měsíců'),
               Tab(text: '12 měsíců'),
             ],
@@ -300,6 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Card(
         elevation: 4.0,
+        //color: Colors.white10,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -333,6 +334,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Card(
+        //color: Colors.white10,
         elevation: 4.0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),

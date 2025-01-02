@@ -5,10 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 
-
 void main() async {
   await dotenv.load(fileName: "lib/.env");
   runApp(MyApp());
+}
+
+class AppColors {
+  static const veryDarkBlack = Color.fromARGB(255, 14, 14, 14);
+  static const moreDarkBlack = Color.fromARGB(255, 24, 24, 24);
 }
 
 class MyApp extends StatelessWidget {
@@ -19,11 +23,36 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trackifly',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.lightGreen,
-          brightness: Brightness.dark,
+        colorScheme: ColorScheme(
+          brightness: Brightness.dark, // Tmavý režim
+          primary: Colors.white, // Hlavní barva (např. pro AppBar)
+          onPrimary: Colors.black, // Text na hlavní barvě
+          secondary: Colors.grey[700]!, // Sekundární barva
+          onSecondary: Colors.white, // Text na sekundární barvě
+          surface: AppColors.moreDarkBlack, // Karty
+          onSurface: Colors.white, // Text na povrchové barvě
+          error: Colors.red, // Chybová barva
+          onError: Colors.black,
+          outline: Colors.grey[600]!,
+          shadow: Colors.grey[900]!,
         ),
-        useMaterial3: true,
+        scaffoldBackgroundColor: AppColors.veryDarkBlack, // Čistě černé pozadí aplikace
+
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.veryDarkBlack, // Černý AppBar
+          foregroundColor: Colors.white, // Text v AppBaru
+        ),
+
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.white10, // Barva pozadí
+          indicatorColor: Colors.white12, // Barva indikátoru pro vybranou položku
+          labelTextStyle: MaterialStateProperty.all(
+            TextStyle(color: Colors.white, fontSize: 12),
+          ),
+          iconTheme: MaterialStateProperty.all(
+            IconThemeData(color: Colors.white),
+          ),
+        ),
       ),
       home: WelcomeScreen(),
       debugShowCheckedModeBanner: false,
@@ -42,7 +71,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   late AnimationController _animationController;
-  late Animation<Color?> _backgroundColorAnimation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
@@ -55,10 +84,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       duration: Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    _backgroundColorAnimation = ColorTween(
-      begin: Colors.lightGreen.shade400,
-      end: Colors.teal.shade600,
-    ).animate(_animationController);
+    // Animace pro glow efekt
+    _glowAnimation = Tween<double>(begin: 0.0, end: 15.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   Future<void> setOptimalDisplayMode() async {
@@ -107,106 +139,98 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _backgroundColorAnimation,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _backgroundColorAnimation.value!,
-                  Colors.black,
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(height: 210),
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icon/icon.png', // Cesta k logu
+                      height: 120,
+                      width: 120,
+                      fit: BoxFit.cover, // Přizpůsobení obrázku do kruhu
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Trackifly',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Objevuj své hudební statistiky.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 40),
+                  if (_isLoading)
+                    CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
                 ],
               ),
             ),
-            child: child,
-          );
-        },
-        child: Stack(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(height: 210),
-                    AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: 1.1 + 0.1 * _animationController.value,
-                          child: child,
-                        );
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30.0),
+              child: AnimatedOpacity(
+                opacity: _isLoading ? 0.0 : 1.0,
+                duration: Duration(milliseconds: 500),
+                child: AnimatedBuilder(
+                  animation: _glowAnimation,
+                  builder: (context, child) {
+                    return ElevatedButton(
+                      onPressed: () async {
+                        await _authenticate();
                       },
-                      child: ClipOval(
-                        child: Image.asset(
-                          'assets/icon/icon.png', // Cesta k logu
-                          height: 120,
-                          width: 120,
-                          fit: BoxFit.cover, // Přizpůsobení obrázku do kruhu
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30), // Zaoblené rohy
+                        ),
+                        elevation: 10, // Zvýšení efektu glow
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.7),
+                              spreadRadius: _glowAnimation.value, // Nastavení šířky glow efektu
+                              blurRadius: _glowAnimation.value,   // Nastavení rozmazání glow efektu
+                              offset: Offset(0, 0), // Střední pozice
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Přihlásit se přes Spotify',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Trackifly',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Objevuj své hudební statistiky.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(height: 40),
-                    if (_isLoading)
-                      CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30.0),
-                child: AnimatedOpacity(
-                  opacity: _isLoading ? 0.0 : 1.0,
-                  duration: Duration(milliseconds: 500),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await _authenticate();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    ),
-                    child: Text(
-                      'Přihlásit se přes Spotify',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
-
-
 }
