@@ -30,7 +30,7 @@ class ApiService {
     String callbackUrlScheme;
 
     if (Foundation.kIsWeb) {
-      redirectUri = 'https://a859-83-136-207-34.ngrok-free.app/auth.html';
+      redirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
       callbackUrlScheme = 'http';
     } else {
       redirectUri = 'trackifly://callback';
@@ -53,7 +53,7 @@ class ApiService {
     // Získání správného redirectUri podle platformy
     String redirectUri;
     if (Foundation.kIsWeb) {
-      redirectUri = 'https://a859-83-136-207-34.ngrok-free.app/auth.html';
+      redirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
     } else {
       redirectUri = 'trackifly://callback';
     }
