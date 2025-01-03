@@ -4,7 +4,7 @@
 
 App that shows stats from Spotify using their API 
 
-# The application is in fresh development and contains bugs, stable versions in releases on GH. 
+# The application is in fresh development and contains bugs, stable versions will be in releases on GH. 
 ## At the moment you can find test versions WHICH ARE NOT INTENDED FOR USE on [my google drive](https://drive.google.com/drive/folders/1S4TqqdVXbb2UNlKy6ZhLlanS9BCuAbQB?usp=sharing) ⚠️
 
 
