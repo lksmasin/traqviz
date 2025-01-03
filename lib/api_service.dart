@@ -7,9 +7,14 @@ import 'package:trackifly/main.dart';
 import 'package:flutter/foundation.dart' as Foundation;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class ApiService {
-  static String get clientId => dotenv.get('CLIENT_ID');
-  static String get clientSecret => dotenv.get('CLIENT_SECRET');
+  static String get clientSecret =>
+      dotenv.isInitialized && dotenv.env['CLIENT_SECRET'] != null
+          ? dotenv.get('CLIENT_SECRET')
+          : const String.fromEnvironment('CLIENT_SECRET', defaultValue: '');
+  static const String clientId = 'a97e9776d53f41cdbe9c6e61f97c6e80';
+  //static  String get clientSecret => dotenv.get('CLIENT_SECRET');
   static const String REDIRECT_URI = 'trackifly://callback';
   static const String SPOTIFY_API_URL_ME = 'https://api.spotify.com/v1/me';
   static const String SPOTIFY_API_URL_TRACKS = 'https://api.spotify.com/v1/me/top/tracks';
