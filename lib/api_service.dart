@@ -5,8 +5,6 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trackifly/main.dart';
 import 'package:flutter/foundation.dart' as Foundation;
-import 'package:shared_preferences/shared_preferences.dart';
-
 
 class ApiService {
   static String get clientSecret =>

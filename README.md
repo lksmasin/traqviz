@@ -5,7 +5,7 @@
 App that shows stats from Spotify using their API 
 
 # The application is in fresh development and contains bugs, stable versions will be in releases on GH. 
-## At the moment you can find test versions WHICH ARE NOT INTENDED FOR USE on [my google drive](https://drive.google.com/drive/folders/1S4TqqdVXbb2UNlKy6ZhLlanS9BCuAbQB?usp=sharing) ⚠️
+## At the moment you can find test versions for android WHICH ARE NOT INTENDED FOR USE on [my google drive](https://drive.google.com/drive/folders/1S4TqqdVXbb2UNlKy6ZhLlanS9BCuAbQB?usp=sharing), or you can use the [web version](https://lksmasin.github.io/trackifly/) which is built from the gh-pages branch. ⚠️ 
 
 
 ## Installation

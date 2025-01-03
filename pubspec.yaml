@@ -86,6 +86,8 @@ flutter:
 
 
   assets:
+  # ENV Only for local developing
+  # When commiting to GitHub line below have to be comented for GH Actions web build
   #- .env
   - assets/icon/icon.png
   - assets/icon/icon_background.png
