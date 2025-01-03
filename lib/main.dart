@@ -11,17 +11,18 @@ void main() async {
   try {
     // Pokus o načtení .env souboru
     await dotenv.load(fileName: ".env");
-    print('Loaded .env file.');
+    debugPrint('Loaded .env file.');
   } catch (e) {
-    print('Failed to load .env file. Using fallback to dart-define.');
+    debugPrint('Failed to load .env file. Using fallback to dart-define.');
   }
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class AppColors {
   static const veryDarkBlack = Color.fromARGB(255, 14, 14, 14);
   static const moreDarkBlack = Color.fromARGB(255, 24, 24, 24);
+  static const notRealWhite = Color.fromARGB(255, 235, 235, 235);
 }
 
 class MyApp extends StatelessWidget {
@@ -33,37 +34,25 @@ class MyApp extends StatelessWidget {
       title: 'Trackifly',
       theme: ThemeData(
         colorScheme: ColorScheme(
-          brightness: Brightness.dark, // Tmavý režim
-          primary: Colors.white, // Hlavní barva (např. pro AppBar)
-          onPrimary: Colors.black, // Text na hlavní barvě
-          secondary: Colors.grey[700]!, // Sekundární barva
-          onSecondary: Colors.white, // Text na sekundární barvě
-          surface: AppColors.moreDarkBlack, // Karty
-          onSurface: Colors.white, // Text na povrchové barvě
-          error: Colors.red, // Chybová barva
+          brightness: Brightness.dark,
+          primary: Colors.white,
+          onPrimary: Colors.black,
+          secondary: Colors.grey[700]!,
+          onSecondary: Colors.white,
+          surface: AppColors.moreDarkBlack,
+          onSurface: AppColors.notRealWhite,
+          error: Colors.red,
           onError: Colors.black,
           outline: Colors.grey[600]!,
           shadow: Colors.grey[900]!,
         ),
-        scaffoldBackgroundColor: AppColors.veryDarkBlack, // Čistě černé pozadí aplikace
-
+        scaffoldBackgroundColor: AppColors.veryDarkBlack,
         appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.veryDarkBlack, // Černý AppBar
-          foregroundColor: Colors.white, // Text v AppBaru
-        ),
-
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: Colors.white10, // Barva pozadí
-          indicatorColor: Colors.white12, // Barva indikátoru pro vybranou položku
-          labelTextStyle: WidgetStateProperty.all(
-            TextStyle(color: Colors.white, fontSize: 12),
-          ),
-          iconTheme: WidgetStateProperty.all(
-            IconThemeData(color: Colors.white),
-          ),
+          backgroundColor: AppColors.veryDarkBlack,
+          foregroundColor: Colors.white,
         ),
       ),
-      home: WelcomeScreen(),
+      home: const WelcomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -73,10 +62,10 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  _WelcomeScreenState createState() => _WelcomeScreenState();
+  WelcomeScreenState createState() => WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen>
+class WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   late AnimationController _animationController;
@@ -84,16 +73,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void initState() {
-    setOptimalDisplayMode(); // Zavolání metody pro nastavení optimálního režimu zobrazení
+    setOptimalDisplayMode();
     super.initState();
 
-    // Animace pozadí
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    // Animace pro glow efekt
     _glowAnimation = Tween<double>(begin: 0.0, end: 15.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -106,19 +93,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final List<DisplayMode> supported = await FlutterDisplayMode.supported;
     final DisplayMode active = await FlutterDisplayMode.active;
 
-    // Filtrujeme režimy se stejným rozlišením, jako má aktivní režim
     final List<DisplayMode> sameResolution = supported.where(
       (DisplayMode m) =>
           m.width == active.width && m.height == active.height,
     ).toList()
       ..sort((DisplayMode a, DisplayMode b) =>
-          b.refreshRate.compareTo(a.refreshRate)); // Seřadíme podle obnovovací frekvence
+          b.refreshRate.compareTo(a.refreshRate));
 
-    // Vybereme režim s nejvyšší obnovovací frekvencí
     final DisplayMode mostOptimalMode =
         sameResolution.isNotEmpty ? sameResolution.first : active;
 
-    // Nastavíme preferovaný režim
     await FlutterDisplayMode.setPreferredMode(mostOptimalMode);
   }
 
@@ -135,11 +119,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     });
 
     try {
-      print('Začíná autentizace...');
+      debugPrint('Začíná autentizace...');
       await ApiService.authenticate();
-      print('Autentizace proběhla úspěšně');
+      debugPrint('Autentizace proběhla ústěšně');
     } catch (e) {
-      print('Chyba při autentizaci: $e');
+      debugPrint('Chyba při autentizaci: $e');
     }
 
     setState(() {
@@ -147,13 +131,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     });
 
     if (ApiService.accessToken != null) {
-      print("Token: ${ApiService.accessToken}");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MyHomePage()),
-      );
+      //debugPrint("Token: \${ApiService.accessToken}");
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MyHomePage()),
+        );
+      }
     } else {
-      print('Token je null');
+      debugPrint('Token je null');
     }
   }
 
@@ -169,17 +155,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(height: 210),
+                  const SizedBox(height: 210),
                   ClipOval(
                     child: Image.asset(
-                      'assets/icon/icon.png', // Cesta k logu
+                      'assets/icon/icon.png',
                       height: 120,
                       width: 120,
-                      fit: BoxFit.cover, // Přizpůsobení obrázku do kruhu
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Text(
+                  const SizedBox(height: 20),
+                  const Text(
                     'Trackifly',
                     style: TextStyle(
                       fontSize: 36,
@@ -187,15 +173,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Text(
+                  const SizedBox(height: 10),
+                  const Text(
                     'Objevuj své hudební statistiky.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 18),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   if (_isLoading)
-                    CircularProgressIndicator(
+                    const CircularProgressIndicator(
                       color: Colors.white,
                     ),
                 ],
@@ -208,35 +194,35 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               padding: const EdgeInsets.only(bottom: 30.0),
               child: AnimatedOpacity(
                 opacity: _isLoading ? 0.0 : 1.0,
-                duration: Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 child: AnimatedBuilder(
                   animation: _glowAnimation,
                   builder: (context, child) {
                     return ElevatedButton(
                       onPressed: () async {
-                        await _authenticate(); // Spustí autentizaci
+                        await _authenticate();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 15),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30), // Zaoblené rohy
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        elevation: 10, // Zvýšení efektu glow
+                        elevation: 10,
                       ),
                       child: Container(
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
                               color: Colors.white.withOpacity(0.7),
-                              spreadRadius: _glowAnimation.value, // Nastavení šířky glow efektu
-                              blurRadius: _glowAnimation.value,   // Nastavení rozmazání glow efektu
-                              offset: Offset(0, 0), // Střední pozice
+                              spreadRadius: _glowAnimation.value,
+                              blurRadius: _glowAnimation.value,
+                              offset: const Offset(0, 0),
                             ),
                           ],
                         ),
-                        child: Text(
+                        child: const Text(
                           'Přihlásit se přes Spotify',
                           style: TextStyle(
                             color: Colors.black,

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trackifly/main.dart';
-import 'package:flutter/foundation.dart' as Foundation;
+import 'package:flutter/foundation.dart' as foundation;
 
 class ApiService {
   static String get clientSecret =>
@@ -12,32 +12,31 @@ class ApiService {
           ? dotenv.get('CLIENT_SECRET')
           : const String.fromEnvironment('CLIENT_SECRET', defaultValue: '');
   static const String clientId = 'a97e9776d53f41cdbe9c6e61f97c6e80';
-  //static  String get clientSecret => dotenv.get('CLIENT_SECRET');
-  static const String REDIRECT_URI = 'trackifly://callback';
-  static const String SPOTIFY_API_URL_ME = 'https://api.spotify.com/v1/me';
-  static const String SPOTIFY_API_URL_TRACKS = 'https://api.spotify.com/v1/me/top/tracks';
-  static const String SPOTIFY_API_URL_ARTISTS = 'https://api.spotify.com/v1/me/top/artists';
-  static const String SPOTIFY_API_URL_RECENTLY_PLAYED = 'https://api.spotify.com/v1/me/player/recently-played';
-  static const String SPOTIFY_API_URL_CURRENTLY_PLAYING = 'https://api.spotify.com/v1/me/player/currently-playing';
+  static const String redirectUri = 'trackifly://callback';
+  static const String spotifyApiUrlMe = 'https://api.spotify.com/v1/me';
+  static const String spotifyApiUrlTracks = 'https://api.spotify.com/v1/me/top/tracks';
+  static const String spotifyApiUrlArtists = 'https://api.spotify.com/v1/me/top/artists';
+  static const String spotifyApiUrlRecentlyPlayed = 'https://api.spotify.com/v1/me/player/recently-played';
+  static const String spotifyApiUrlCurrentlyPlaying = 'https://api.spotify.com/v1/me/player/currently-playing';
 
   static String? accessToken;
   static String? refreshToken;
 
   static Future<void> authenticate() async {
-    String redirectUri;
+    String usedRedirectUri;
     String callbackUrlScheme;
 
-    if (Foundation.kIsWeb) {
-      redirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
+    if (foundation.kIsWeb) {
+      usedRedirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
       callbackUrlScheme = 'http';
     } else {
-      redirectUri = 'trackifly://callback';
+      usedRedirectUri = 'trackifly://callback';
       callbackUrlScheme = 'trackifly';
     }
 
     final result = await FlutterWebAuth2.authenticate(
       url:
-          'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$redirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state',
+          'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=$usedRedirectUri&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state',
       callbackUrlScheme: callbackUrlScheme,
     );
 
@@ -48,12 +47,11 @@ class ApiService {
   }
 
   static Future<void> _getAccessToken(String code) async {
-    // Získání správného redirectUri podle platformy
-    String redirectUri;
-    if (Foundation.kIsWeb) {
-      redirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
+    String usedRedirectUri;
+    if (foundation.kIsWeb) {
+      usedRedirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
     } else {
-      redirectUri = 'trackifly://callback';
+      usedRedirectUri = 'trackifly://callback';
     }
 
     final response = await http.post(
@@ -65,7 +63,7 @@ class ApiService {
       body: {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': redirectUri, // Dynamický redirectUri
+        'redirect_uri': usedRedirectUri,
       },
     );
 
@@ -74,14 +72,13 @@ class ApiService {
       accessToken = data['access_token'];
       refreshToken = data['refresh_token'];
     } else {
-      print('Error: ${response.statusCode} - ${response.body}');
+      debugPrint('Error: ${response.statusCode} - ${response.body}');
     }
   }
 
-
   static Future<String?> fetchUserProfile() async {
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_ME),
+      Uri.parse(spotifyApiUrlMe),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -94,7 +91,7 @@ class ApiService {
 
   static Future<String?> fetchUserName() async {
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_ME),
+      Uri.parse(spotifyApiUrlMe),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -106,7 +103,7 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchTopTracks({String timeRange = 'short_term'}) async {
-    final uri = Uri.parse(SPOTIFY_API_URL_TRACKS).replace(queryParameters: {'time_range': timeRange});
+    final uri = Uri.parse(spotifyApiUrlTracks).replace(queryParameters: {'time_range': timeRange});
 
     final response = await http.get(
       uri,
@@ -125,7 +122,7 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchTopArtists({String timeRange = 'short_term'}) async {
-    final uri = Uri.parse(SPOTIFY_API_URL_ARTISTS).replace(queryParameters: {'time_range': timeRange});
+    final uri = Uri.parse(spotifyApiUrlArtists).replace(queryParameters: {'time_range': timeRange});
 
     final response = await http.get(
       uri,
@@ -144,7 +141,7 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchRecentPlays({int limit = 30}) async {
-    final uri = Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED)
+    final uri = Uri.parse(spotifyApiUrlRecentlyPlayed)
         .replace(queryParameters: {'limit': limit.toString()});
 
     final response = await http.get(
@@ -169,7 +166,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> fetchCurrentlyPlaying() async {
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_CURRENTLY_PLAYING),
+      Uri.parse(spotifyApiUrlCurrentlyPlaying),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -186,7 +183,7 @@ class ApiService {
         'image': data['item']['album']['images'][0]['url'],
       };
     } else {
-      print('Error: ${response.statusCode} - ${response.body}');
+      debugPrint('Error: ${response.statusCode} - ${response.body}');
     }
 
     return null;
@@ -194,7 +191,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> fetchLastPlayedTrack() async {
     final response = await http.get(
-      Uri.parse(SPOTIFY_API_URL_RECENTLY_PLAYED),
+      Uri.parse(spotifyApiUrlRecentlyPlayed),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -209,7 +206,7 @@ class ApiService {
         };
       }
     } else {
-      print('Error: ${response.statusCode} - ${response.body}');
+      debugPrint('Error: ${response.statusCode} - ${response.body}');
     }
 
     return null;

@@ -8,10 +8,10 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   bool _isLoggedIn = false;
   String? userProfileImage;
   List<Map<String, dynamic>> _topTracks = [];
@@ -369,49 +369,52 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _showProfileMenu() async {
     final userName = await ApiService.fetchUserName(); // Získání jména uživatele
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Ahoj, $userName!'), // Zobrazení jména uživatele
-              SizedBox(height: 10),
+    if (mounted) {  // Zkontrolujte, zda je widget stále "připojený"
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Ahoj, $userName!'), // Zobrazení jména uživatele
+                SizedBox(height: 10),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await logout();
+                  Navigator.pop(context);
+                },
+                child: Text('Odhlásit'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SettingsPage()),
+                  );
+                },
+                child: Text('Nastavení'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => InfoPage()),
+                  );
+                },
+                child: Text('Informace'),
+              ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await logout();
-                Navigator.pop(context);
-              },
-              child: Text('Odhlásit'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsPage()), // Navigace na stránku nastavení
-                );
-              },
-              child: Text('Nastavení'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InfoPage()), // Navigace na stránku informací
-                );
-              },
-              child: Text('Informace'),
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
+
 
 }

@@ -15,10 +15,10 @@ class InfoPage extends StatefulWidget {
   const InfoPage({super.key});
 
   @override
-  _InfoPageState createState() => _InfoPageState();
+  InfoPageState createState() => InfoPageState();
 }
 
-class _InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin {
+class InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _glowAnimation;
 
@@ -41,8 +41,9 @@ class _InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin
   }
 
   Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       throw 'Nepodařilo se otevřít URL: $url';
     }
