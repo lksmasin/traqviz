@@ -6,8 +6,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ujistěte se, že se widgety správně inicializují
-  await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // Pokus o načtení .env souboru
+    await dotenv.load(fileName: ".env");
+    print('Loaded .env file.');
+  } catch (e) {
+    print('Failed to load .env file. Using fallback to dart-define.');
+  }
+
   runApp(MyApp());
 }
 
