@@ -22505,7 +22505,7 @@ BR(){var s=0,r=A.K(t.H),q,p
 var $async$BR=A.L(function(a,b){if(a===1)return A.H(b,r)
 while(true)switch(s){case 0:p=A
 s=2
-return A.Q(A.agO("http","https://accounts.spotify.com/authorize?client_id=a97e9776d53f41cdbe9c6e61f97c6e80&response_type=code&redirect_uri=https://a859-83-136-207-34.ngrok-free.app/auth.html&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state"),$async$BR)
+return A.Q(A.agO("http","https://accounts.spotify.com/authorize?client_id=a97e9776d53f41cdbe9c6e61f97c6e80&response_type=code&redirect_uri=https://lksmasin.github.io/trackifly/auth.html&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state"),$async$BR)
 case 2:q=p.cS(b,0,null).gQ0().i(0,"code")
 s=q!=null?3:4
 break
@@ -22524,7 +22524,7 @@ m=B.bw.cE("a97e9776d53f41cdbe9c6e61f97c6e80:"+m)
 q=t.N
 m=A.ad(["Authorization","Basic "+B.jW.gCs().cE(m),"Content-Type","application/x-www-form-urlencoded"],q,q)
 s=2
-return A.Q(A.aD7(n,A.ad(["grant_type","authorization_code","code",a,"redirect_uri","https://a859-83-136-207-34.ngrok-free.app/auth.html"],q,q),m),$async$QF)
+return A.Q(A.aD7(n,A.ad(["grant_type","authorization_code","code",a,"redirect_uri","https://lksmasin.github.io/trackifly/auth.html"],q,q),m),$async$QF)
 case 2:p=c
 n=p.b
 m=p.e
