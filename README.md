@@ -32,9 +32,9 @@ Or build project:
 ## TODO (Plans)
 
 - [x] Migrate to flutter_web_auth_2
-- [ ] More stats (history...)
+- [ ] More stats (history...) - IN PROGRESS
 - [ ] Settings 
-- [ ] Web support
+- [x] Web support
 - [ ] Google play release
 
 
