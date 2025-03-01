@@ -76,7 +76,7 @@ class InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin 
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Trackifly',
+                    'TraqViz',
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
@@ -91,7 +91,7 @@ class InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin 
                   ),
                   SizedBox(height: 40),
                   Text(
-                    'Trackifly je aplikace pro analýzu a sledování tvých hudebních statistik a preferencí ze Spotify.',
+                    'TraqViz je aplikace pro analýzu a sledování tvých hudebních statistik a preferencí ze Spotify.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.white70),
                   ),
@@ -113,15 +113,15 @@ class InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin 
                     children: [
                       IconButton(
                         icon: Icon(Icons.language, color: Colors.white),
-                        onPressed: () => _launchURL('https://lksmasin.github.io/trackifly-web/'), // Webová stránka
+                        onPressed: () => _launchURL('https://lksmasin.github.io/TraqViz-web/'), // Webová stránka
                       ),
                       IconButton(
                         icon: Icon(Icons.code, color: Colors.white),
-                        onPressed: () => _launchURL('https://github.com/lksmasin/trackifly'), // GitHub
+                        onPressed: () => _launchURL('https://github.com/lksmasin/TraqViz'), // GitHub
                       ),
                       IconButton(
                         icon: Icon(Icons.android, color: Colors.white),
-                        onPressed: () => _launchURL('https://play.google.com/store/apps/details?id=io.github.lksmasin.trackifly'), // Google Play Store
+                        onPressed: () => _launchURL('https://play.google.com/store/apps/details?id=io.github.lksmasin.TraqViz'), // Google Play Store
                       ),
                     ],
                   ),

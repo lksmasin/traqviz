@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Trackifly',
+      title: 'TraqViz',
       theme: ThemeData(
         colorScheme: ColorScheme(
           brightness: Brightness.dark,
@@ -166,7 +166,7 @@ class WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Trackifly',
+                    'TraqViz',
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,

@@ -12,7 +12,7 @@ class ApiService {
           ? dotenv.get('CLIENT_SECRET')
           : const String.fromEnvironment('CLIENT_SECRET', defaultValue: '');
   static const String clientId = 'a97e9776d53f41cdbe9c6e61f97c6e80';
-  static const String redirectUri = 'trackifly://callback';
+  static const String redirectUri = 'traqviz://callback';
   static const String spotifyApiUrlMe = 'https://api.spotify.com/v1/me';
   static const String spotifyApiUrlTracks = 'https://api.spotify.com/v1/me/top/tracks';
   static const String spotifyApiUrlArtists = 'https://api.spotify.com/v1/me/top/artists';
@@ -27,11 +27,11 @@ class ApiService {
     String callbackUrlScheme;
 
     if (foundation.kIsWeb) {
-      usedRedirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
+      usedRedirectUri = 'https://lksmasin.github.io/traqviz/auth.html';
       callbackUrlScheme = 'http';
     } else {
-      usedRedirectUri = 'trackifly://callback';
-      callbackUrlScheme = 'trackifly';
+      usedRedirectUri = 'traqviz://callback';
+      callbackUrlScheme = 'traqviz';
     }
 
     final result = await FlutterWebAuth2.authenticate(
@@ -49,9 +49,9 @@ class ApiService {
   static Future<void> _getAccessToken(String code) async {
     String usedRedirectUri;
     if (foundation.kIsWeb) {
-      usedRedirectUri = 'https://lksmasin.github.io/trackifly/auth.html';
+      usedRedirectUri = 'https://lksmasin.github.io/traqviz/auth.html';
     } else {
-      usedRedirectUri = 'trackifly://callback';
+      usedRedirectUri = 'traqviz://callback';
     }
 
     final response = await http.post(

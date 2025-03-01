@@ -39,6 +39,7 @@ dependencies:
   flutter_web_auth_2: ^4.1.0
   url_launcher: ^6.3.1
   shared_preferences: ^2.3.5
+  rename_app: ^1.6.2
 
 
 
