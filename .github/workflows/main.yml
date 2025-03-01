@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: |
         flutter pub get
-        flutter build web --release --web-renderer html --base-href=/trackifly/ --dart-define=CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+        flutter build web --release --web-renderer html --base-href=/traqviz/ --dart-define=CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
       env:
         REACT_APP_APIKey: ${{ secrets.CLIENT_ID }}
         REACT_APP_APISecret: ${{ secrets.CLIENT_SECRET }}
