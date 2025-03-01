@@ -22501,7 +22501,7 @@ BR(){var s=0,r=A.K(t.H),q,p
 var $async$BR=A.L(function(a,b){if(a===1)return A.H(b,r)
 while(true)switch(s){case 0:p=A
 s=2
-return A.Q(A.agO("http","https://accounts.spotify.com/authorize?client_id=a97e9776d53f41cdbe9c6e61f97c6e80&response_type=code&redirect_uri=https://lksmasin.github.io/trackifly/auth.html&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state"),$async$BR)
+return A.Q(A.agO("http","https://accounts.spotify.com/authorize?client_id=a97e9776d53f41cdbe9c6e61f97c6e80&response_type=code&redirect_uri=https://lksmasin.github.io/traqviz/auth.html&scope=user-top-read user-read-private user-read-email user-read-recently-played user-read-playback-state"),$async$BR)
 case 2:q=p.cN(b,0,null).gPX().i(0,"code")
 s=q!=null?3:4
 break
@@ -22520,7 +22520,7 @@ m=B.bw.cE("a97e9776d53f41cdbe9c6e61f97c6e80:"+m)
 q=t.N
 m=A.ad(["Authorization","Basic "+B.jX.gCq().cE(m),"Content-Type","application/x-www-form-urlencoded"],q,q)
 s=2
-return A.Q(A.aD5(n,A.ad(["grant_type","authorization_code","code",a,"redirect_uri","https://lksmasin.github.io/trackifly/auth.html"],q,q),m),$async$QG)
+return A.Q(A.aD5(n,A.ad(["grant_type","authorization_code","code",a,"redirect_uri","https://lksmasin.github.io/traqviz/auth.html"],q,q),m),$async$QG)
 case 2:p=c
 n=p.b
 m=p.e
@@ -72309,7 +72309,7 @@ return A.I(null,r)}})
 return A.J($async$Do,r)},
 a1T(a){A.E0()
 this.ag(new A.a0u(this,a))},
-K(a){var s,r,q,p=this,o=null,n=A.bM("Trackifly",o,o,o,o),m=A.b([],t.D)
+K(a){var s,r,q,p=this,o=null,n=A.bM("TraqViz",o,o,o,o),m=A.b([],t.D)
 if(p.d){s=p.e
 r=s!=null
 if(r&&s.length!==0){s.toString
@@ -72485,7 +72485,7 @@ $1(a){return new A.me(null)},
 $S:457}
 A.F_.prototype={
 K(a){var s=null,r=A.CC(s,B.ad,B.Fd,s,s,s,s,B.o,s,s,B.o,s,s,s,B.i,s,s,s,B.zN,s,s,s,s,s,B.da,s,B.i,s,s,s,s,B.ht,s,s,s,B.kz,B.zj,s,s,s,s,s,s,s,s,s,s,s,s,s)
-return new A.uZ(B.PK,"Trackifly",A.ahM(A.ajL(s,B.kw,s,s,B.i,s,s,s,s,s,s,s,s,s,s),s,r,B.kw,s),!1,s)}}
+return new A.uZ(B.PK,"TraqViz",A.ahM(A.ajL(s,B.kw,s,s,B.i,s,s,s,s,s,s,s,s,s,s),s,r,B.kw,s),!1,s)}}
 A.jo.prototype={
 af(){return new A.If(null,null)}}
 A.If.prototype={
@@ -72619,17 +72619,17 @@ m(){var s=this.d
 s===$&&A.a()
 s.m()
 this.UF()},
-K(a1){var s=this,r=null,q=A.dD(r,150,r),p=A.hJ(B.Bq,B.z,r,120),o=A.dD(r,20,r),n=A.bM("Trackifly",r,r,A.hd(r,r,B.i,r,r,r,r,r,r,r,r,36,r,r,B.bS,r,r,!0,r,r,r,r,r,r,r,r),r),m=A.dD(r,10,r),l=A.bM("Informace o aplikaci.",r,r,A.hd(r,r,r,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),k=A.dD(r,40,r),j=A.bM("Trackifly je aplikace pro anal\xfdzu a sledov\xe1n\xed tv\xfdch hudebn\xedch statistik a preferenc\xed ze Spotify.",r,r,A.hd(r,r,B.z,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),i=A.dD(r,20,r),h=A.bM("V\u0161echny obr\xe1zky jsou chr\xe1n\u011bny autorsk\xfdm pr\xe1vem p\u0159\xedslu\u0161n\xfdch vlastn\xedk\u016f autorsk\xfdch pr\xe1v.\nTato aplikace nen\xed nijak spojena se Spotify.",r,r,A.hd(r,r,B.z,r,r,r,r,r,r,r,r,12,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),g=A.dD(r,40,r),f=A.bM("Odkazy:",r,r,A.hd(r,r,B.i,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),e=A.dD(r,10,r),d=t.D,c=A.pH(A.b([A.Ed(r,A.hJ(B.Br,B.i,r,r),r,new A.WX(s),r,r),A.Ed(r,A.hJ(B.Bl,B.i,r,r),r,new A.WY(s),r,r),A.Ed(r,A.hJ(B.Bj,B.i,r,r),r,new A.WZ(s),r,r)],d),B.ah,B.il,B.al),b=A.dD(r,140,r),a=A.cu(0,500,0),a0=s.e
+K(a1){var s=this,r=null,q=A.dD(r,150,r),p=A.hJ(B.Bq,B.z,r,120),o=A.dD(r,20,r),n=A.bM("TraqViz",r,r,A.hd(r,r,B.i,r,r,r,r,r,r,r,r,36,r,r,B.bS,r,r,!0,r,r,r,r,r,r,r,r),r),m=A.dD(r,10,r),l=A.bM("Informace o aplikaci.",r,r,A.hd(r,r,r,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),k=A.dD(r,40,r),j=A.bM("TraqViz je aplikace pro anal\xfdzu a sledov\xe1n\xed tv\xfdch hudebn\xedch statistik a preferenc\xed ze Spotify.",r,r,A.hd(r,r,B.z,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),i=A.dD(r,20,r),h=A.bM("V\u0161echny obr\xe1zky jsou chr\xe1n\u011bny autorsk\xfdm pr\xe1vem p\u0159\xedslu\u0161n\xfdch vlastn\xedk\u016f autorsk\xfdch pr\xe1v.\nTato aplikace nen\xed nijak spojena se Spotify.",r,r,A.hd(r,r,B.z,r,r,r,r,r,r,r,r,12,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),g=A.dD(r,40,r),f=A.bM("Odkazy:",r,r,A.hd(r,r,B.i,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),B.bH),e=A.dD(r,10,r),d=t.D,c=A.pH(A.b([A.Ed(r,A.hJ(B.Br,B.i,r,r),r,new A.WX(s),r,r),A.Ed(r,A.hJ(B.Bl,B.i,r,r),r,new A.WY(s),r,r),A.Ed(r,A.hJ(B.Bj,B.i,r,r),r,new A.WZ(s),r,r)],d),B.ah,B.il,B.al),b=A.dD(r,140,r),a=A.cu(0,500,0),a0=s.e
 a0===$&&A.a()
 return A.ahs(r,A.q3(B.cp,A.b([A.iy(new A.bP(B.cu,A.jZ(A.b([q,p,o,n,m,l,k,j,i,h,g,f,e,c,b,A.ajJ(A.jO(a0,new A.X_(s),r),a,1)],d),B.ah,B.a7,B.al),r),r,r)],d),B.cg),r)}}
 A.WX.prototype={
-$0(){return this.a.ly("https://lksmasin.github.io/trackifly-web/")},
+$0(){return this.a.ly("https://lksmasin.github.io/TraqViz-web/")},
 $S:0}
 A.WY.prototype={
-$0(){return this.a.ly("https://github.com/lksmasin/trackifly")},
+$0(){return this.a.ly("https://github.com/lksmasin/TraqViz")},
 $S:0}
 A.WZ.prototype={
-$0(){return this.a.ly("https://play.google.com/store/apps/details?id=io.github.lksmasin.trackifly")},
+$0(){return this.a.ly("https://play.google.com/store/apps/details?id=io.github.lksmasin.TraqViz")},
 $S:0}
 A.X_.prototype={
 $2(a,b){var s=null,r=A.akT(s,s,B.i,s,s,s,10,s,s,s,s,s,new A.aD(40,15,40,15),s,new A.cc(A.t0(30),B.q),s,s,s,s),q=A.T(B.c.aa(178.5),255,255,255),p=this.a,o=p.e
@@ -77730,7 +77730,7 @@ B.MY=new A.k(!0,B.o,null,"Roboto",B.G,null,null,null,null,null,null,null,null,nu
 B.N7=new A.k(!0,B.o,null,"Roboto",B.G,null,null,null,null,null,null,null,null,null,null,null,null,B.e,null,null,null,"blackHelsinki labelSmall",null,null,null,null)
 B.Os=new A.cR(B.NV,B.L1,B.M0,B.MX,B.N9,B.Ks,B.LA,B.Kw,B.MH,B.Nm,B.Ma,B.No,B.Nz,B.MY,B.N7)
 B.Lq=new A.k(!0,B.i,null,null,null,null,36,B.bS,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.Ot=new A.kS("Trackifly",null,B.Lq,null,null,null,null)
+B.Ot=new A.kS("TraqViz",null,B.Lq,null,null,null,null)
 B.Mi=new A.k(!0,B.o,null,null,null,null,18,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Ou=new A.kS("P\u0159ihl\xe1sit se p\u0159es Spotify",null,B.Mi,null,null,null,null)
 B.Mt=new A.k(!0,null,null,null,null,null,18,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
